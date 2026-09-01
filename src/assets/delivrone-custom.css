@@ -1,0 +1,50 @@
+:root {
+  --delivrone-primary: #042a44;
+  --delivrone-secondary: #1e5782;
+  --delivrone-accent: #e9eff3;
+  --delivrone-info: #1d5b88;
+  --delivrone-light: #2b9fc8;
+  --delivrone-lighter: #d3f3ff;
+  --delivrone-dark: #343a40;
+  --delivrone-success: #28a745;
+  --delivrone-warning: #ffc107;
+  --delivrone-danger: #dc3545;
+
+  --delivrone-font-family: 'Helvetica Neue', Arial, sans-serif;
+  --delivrone-spacer: 1rem;
+  --delivrone-border-radius: 0.25rem;
+  --app-navbar-height: 56px;
+}
+
+body {
+  font-family: var(--delivrone-font-family);
+  background: var(--delivrone-accent);
+}
+
+.navbar-delivrone {
+  background: var(--delivrone-primary);
+}
+
+.navbar-delivrone .navbar-brand,
+.navbar-delivrone .nav-link {
+  color: #fff;
+}
+
+.view-layout {
+  padding-top: calc(var(--app-navbar-height) + 1.5rem);
+  padding-bottom: 3rem;
+}
+
+.card-flyability {
+  border-left: 4px solid var(--delivrone-light);
+}
+
+.pct-flyable-high {
+  color: var(--delivrone-success);
+}
+.pct-flyable-medium {
+  color: var(--delivrone-warning);
+}
+.pct-flyable-low {
+  color: var(--delivrone-danger);
+}
