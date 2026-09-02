@@ -46,7 +46,9 @@ const pctClass = computed(() => {
 
     <p class="text-muted small mt-3 mb-0">
       Calculé le {{ new Date(result.computed_at).toLocaleString('fr-FR') }} pour la période
-      {{ result.start_date }} → {{ result.end_date }}.
+      {{ result.start_date }} → {{ result.end_date }}
+      <template v-if="result.drone_name">— drone {{ result.drone_name }}</template>
+      <template v-if="result.battery_name">, batterie {{ result.battery_name }}</template>.
     </p>
   </div>
 </template>

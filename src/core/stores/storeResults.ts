@@ -11,11 +11,17 @@ export const useResultsStore = defineStore('results', () => {
   const status = ref<'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'>('IDLE')
   const errorMessage = ref<string | null>(null)
 
-  const runAnalysis = async (routeId: number, startDate: string, endDate: string): Promise<void> => {
+  const runAnalysis = async (
+    routeId: number,
+    startDate: string,
+    endDate: string,
+    droneId?: number | null,
+    batteryId?: number | null
+  ): Promise<void> => {
     status.value = 'LOADING'
     errorMessage.value = null
     try {
-      currentResult.value = await computeFlyability(routeId, startDate, endDate)
+      currentResult.value = await computeFlyability(routeId, startDate, endDate, droneId, batteryId)
       history.value = [currentResult.value, ...history.value]
       status.value = 'SUCCESS'
     } catch (error: any) {

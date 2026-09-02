@@ -5,6 +5,14 @@ export interface DroneEnduranceEntry {
   range_km: string
 }
 
+export interface Battery {
+  id: number
+  drone: number
+  name: string
+  capacity_ah: string
+  is_default: boolean
+}
+
 export interface Drone {
   id: number
   name: string
@@ -13,12 +21,12 @@ export interface Drone {
   battery_weight_kg: string
   mtom_kg: string
   max_payload_kg: string
-  battery_capacity_ah: string
   battery_nominal_voltage_v: string
   battery_max_voltage_v: string
   land_min_soc_pct: string
   cruise_current_a: string
   mc_current_a: string
+  mc_speed_ms: string
   takeoff_duration_min: string
   transition_duration_min: string
   landing_duration_min: string
@@ -35,6 +43,7 @@ export interface Drone {
   icing_dewpoint_spread_c: string
   max_altitude_m_amsl: string | null
   endurance_entries: DroneEnduranceEntry[]
+  batteries: Battery[]
   created_at: string
   updated_at: string
 }
@@ -56,6 +65,10 @@ export interface LatestFlyabilityResult {
   end_date: string
   computed_at: string
   total_hours: number
+  drone: number | null
+  drone_name: string | null
+  battery: number | null
+  battery_name: string | null
 }
 
 export interface Route {
@@ -67,11 +80,16 @@ export interface Route {
   destination_detail: Site
   drone: number | null
   is_active: boolean
+  mc_distance_km_origin: string
+  mc_distance_km_destination: string
+  fw_distance_km: string | null
+  resolved_fw_distance_km: string
   distance_km_outbound: string
   distance_km_return: string
   bearing_deg_outbound: string
   bearing_deg_return: string
   latest_result: LatestFlyabilityResult | null
+  resolved_drone: Drone | null
   created_at: string
   updated_at: string
 }
@@ -86,6 +104,10 @@ export interface TimeslotBreakdown {
 export interface FlyabilityResult {
   id: number
   route: number
+  drone: number | null
+  drone_name: string | null
+  battery: number | null
+  battery_name: string | null
   start_date: string
   end_date: string
   computed_at: string

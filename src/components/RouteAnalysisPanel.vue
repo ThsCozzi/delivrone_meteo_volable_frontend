@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import type { Drone } from '@/core/types'
 
-const props = defineProps<{ loading: boolean }>()
-const emit = defineEmits<{ run: [startDate: string, endDate: string] }>()
+const props = defineProps<{ loading: boolean; drones: Drone[]; defaultDroneId: number | null }>()
+const emit = defineEmits<{
+  run: [startDate: string, endDate: string, droneId: number | null, batteryId: number | null]
+}>()
 
 // Open-Meteo's archive has a data-availability lag, so the latest usable
 // end date is a few days behind today — default to 10 days back, and cap
@@ -19,7 +22,23 @@ const maxEndDateIso = toIsoDate(maxEndDate)
 const startDate = ref(toIsoDate(defaultStartDate))
 const endDate = ref(maxEndDateIso)
 
-const onRun = () => emit('run', startDate.value, endDate.value)
+const droneId = ref<number | null>(props.defaultDroneId)
+const batteryId = ref<number | null>(null)
+
+const selectedDroneBatteries = computed(() => {
+  const selectedDrone = props.drones.find((d) => d.id === droneId.value)
+  return selectedDrone?.batteries ?? []
+})
+
+const setDefaultBattery = () => {
+  const defaultBattery = selectedDroneBatteries.value.find((b) => b.is_default) ?? selectedDroneBatteries.value[0]
+  batteryId.value = defaultBattery ? defaultBattery.id : null
+}
+
+watch(() => props.defaultDroneId, (id) => (droneId.value = id))
+watch(droneId, setDefaultBattery, { immediate: true })
+
+const onRun = () => emit('run', startDate.value, endDate.value, droneId.value, batteryId.value)
 </script>
 
 <template>
@@ -34,10 +53,24 @@ const onRun = () => emit('run', startDate.value, endDate.value)
         <input v-model="endDate" type="date" class="form-control" :max="maxEndDateIso" />
       </div>
       <div class="col-md-3">
-        <button class="btn btn-primary" :disabled="props.loading" @click="onRun">
-          {{ props.loading ? 'Analyse en cours...' : "Lancer l'analyse" }}
-        </button>
+        <label class="form-label">Drone</label>
+        <select v-model.number="droneId" class="form-select">
+          <option v-for="d in props.drones" :key="d.id" :value="d.id">{{ d.name }}</option>
+        </select>
       </div>
+      <div class="col-md-3">
+        <label class="form-label">Batterie</label>
+        <select v-model.number="batteryId" class="form-select">
+          <option v-for="battery in selectedDroneBatteries" :key="battery.id" :value="battery.id">
+            {{ battery.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="mt-2">
+      <button class="btn btn-primary" :disabled="props.loading" @click="onRun">
+        {{ props.loading ? 'Analyse en cours...' : "Lancer l'analyse" }}
+      </button>
     </div>
   </div>
 </template>

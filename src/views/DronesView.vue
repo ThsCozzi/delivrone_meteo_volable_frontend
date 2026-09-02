@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useDronesStore } from '@/core/stores/storeDrones'
 import type { Drone } from '@/core/types'
 import DroneForm from '@/components/DroneForm.vue'
+import BatteryList from '@/components/BatteryList.vue'
 
 const dronesStore = useDronesStore()
 const showForm = ref(false)
@@ -49,9 +50,12 @@ const onSubmit = async (payload: Partial<Drone>) => {
           <li>Vent max: {{ drone.wind_limit_ms }} m/s</li>
           <li>Pluie max: {{ drone.rain_limit_mmh }} mm/h</li>
           <li>Temp: {{ drone.temp_min_c }}°C à {{ drone.temp_max_c }}°C</li>
-          <li>Batterie: {{ drone.battery_capacity_ah }} Ah</li>
         </ul>
-        <button class="btn btn-sm btn-outline-secondary" @click="onEdit(drone)">Modifier</button>
+        <button class="btn btn-sm btn-outline-secondary mb-3" @click="onEdit(drone)">Modifier</button>
+
+        <hr class="my-1" />
+        <h3 class="h6 small text-muted text-uppercase">Batteries</h3>
+        <BatteryList :drone="drone" @changed="dronesStore.fetchDrones()" />
       </div>
     </div>
   </div>

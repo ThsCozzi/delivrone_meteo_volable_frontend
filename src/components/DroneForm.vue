@@ -12,12 +12,12 @@ const blank: Partial<Drone> = {
   battery_weight_kg: '3.000',
   mtom_kg: '22.000',
   max_payload_kg: '3.000',
-  battery_capacity_ah: '22.00',
   battery_nominal_voltage_v: '44.40',
   battery_max_voltage_v: '50.40',
   land_min_soc_pct: '30',
   cruise_current_a: '18.00',
   mc_current_a: '100.00',
+  mc_speed_ms: '5.00',
   takeoff_duration_min: '1.00',
   transition_duration_min: '0.50',
   landing_duration_min: '1.00',
@@ -79,10 +79,6 @@ const onSubmit = () => emit('submit', { ...form })
         <input v-model="form.cruise_airspeed_ms" class="form-control" required />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Capacité batterie (Ah)</label>
-        <input v-model="form.battery_capacity_ah" class="form-control" required />
-      </div>
-      <div class="col-md-3">
         <label class="form-label">SoC min à l'atterrissage (%)</label>
         <input v-model="form.land_min_soc_pct" class="form-control" required />
       </div>
@@ -93,6 +89,10 @@ const onSubmit = () => emit('submit', { ...form })
       <div class="col-md-3">
         <label class="form-label">Courant multicoptère (A)</label>
         <input v-model="form.mc_current_a" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Vitesse multicoptère (m/s)</label>
+        <input v-model="form.mc_speed_ms" class="form-control" required />
       </div>
       <div class="col-md-3">
         <label class="form-label">Décollage (min)</label>

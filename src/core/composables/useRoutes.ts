@@ -29,11 +29,15 @@ export function useRoutes() {
   const computeFlyability = async (
     id: number,
     startDate: string,
-    endDate: string
+    endDate: string,
+    droneId?: number | null,
+    batteryId?: number | null
   ): Promise<FlyabilityResult> => {
     const response = await axios.post<FlyabilityResult>(`/api/routes/${id}/compute`, {
       start_date: startDate,
       end_date: endDate,
+      drone: droneId ?? null,
+      battery: batteryId ?? null,
     })
     return response.data
   }
