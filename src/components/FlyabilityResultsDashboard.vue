@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { FlyabilityResult } from '@/core/types'
 import FlyabilityCauseChart from '@/components/FlyabilityCauseChart.vue'
 import FlyabilityTimeslotChart from '@/components/FlyabilityTimeslotChart.vue'
+import FlyabilityPieChart from '@/components/FlyabilityPieChart.vue'
 
 const props = defineProps<{ result: FlyabilityResult }>()
 
@@ -36,10 +37,13 @@ const pctClass = computed(() => {
     </div>
 
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-4">
+        <FlyabilityPieChart :result="result" />
+      </div>
+      <div class="col-md-4">
         <FlyabilityCauseChart :result="result" />
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <FlyabilityTimeslotChart :result="result" />
       </div>
     </div>
