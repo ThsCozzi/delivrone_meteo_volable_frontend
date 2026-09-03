@@ -35,11 +35,7 @@ onMounted(async () => {
   profileForm.fwDistance = fetchedRoute.fw_distance_km ?? fetchedRoute.resolved_fw_distance_km
 })
 
-const onRun = (startDate: string, endDate: string, droneId: number | null, batteryId: number | null) => {
-  resultsStore.runAnalysis(Number(props.id), startDate, endDate, droneId, batteryId)
-}
-
-const onSaveProfile = async () => {
+const saveProfile = async () => {
   savingProfile.value = true
   try {
     route.value = await updateRoute(Number(props.id), {
@@ -51,6 +47,17 @@ const onSaveProfile = async () => {
   } finally {
     savingProfile.value = false
   }
+}
+
+const onSaveProfile = () => saveProfile()
+
+// The analysis is computed server-side from the route's saved profile
+// (MC/FW distances), not from whatever is currently typed in the form — so
+// save first, otherwise a change made just before clicking "Lancer
+// l'analyse" would silently be ignored.
+const onRun = async (startDate: string, endDate: string, droneId: number | null, batteryId: number | null) => {
+  await saveProfile()
+  resultsStore.runAnalysis(Number(props.id), startDate, endDate, droneId, batteryId)
 }
 </script>
 
