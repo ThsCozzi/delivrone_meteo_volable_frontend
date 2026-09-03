@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import type { Site } from '@/core/types'
+import SiteMap from '@/components/SiteMap.vue'
 
 const props = defineProps<{ initial?: Partial<Site> }>()
 const emit = defineEmits<{ submit: [payload: Partial<Site>]; cancel: [] }>()
@@ -14,6 +15,12 @@ watch(
 )
 
 const onSubmit = () => emit('submit', { ...form })
+
+const hasValidCoords = computed(() => {
+  const lat = parseFloat(String(form.latitude ?? ''))
+  const lon = parseFloat(String(form.longitude ?? ''))
+  return Number.isFinite(lat) && Number.isFinite(lon)
+})
 </script>
 
 <template>
@@ -35,6 +42,12 @@ const onSubmit = () => emit('submit', { ...form })
         <button class="btn btn-success w-100" type="submit">Enregistrer</button>
       </div>
     </div>
+
+    <div v-if="hasValidCoords" class="mt-3">
+      <label class="form-label small text-muted">Vue satellite (1 km x 1 km) — pour confirmer la position</label>
+      <SiteMap :latitude="form.latitude!" :longitude="form.longitude!" />
+    </div>
+
     <button class="btn btn-link mt-1 p-0" type="button" @click="emit('cancel')">Annuler</button>
   </form>
 </template>
