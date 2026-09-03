@@ -21,6 +21,11 @@ const hasValidCoords = computed(() => {
   const lon = parseFloat(String(form.longitude ?? ''))
   return Number.isFinite(lat) && Number.isFinite(lon)
 })
+
+const onMarkerMoved = (lat: number, lon: number) => {
+  form.latitude = lat.toFixed(6)
+  form.longitude = lon.toFixed(6)
+}
 </script>
 
 <template>
@@ -45,7 +50,7 @@ const hasValidCoords = computed(() => {
 
     <div v-if="hasValidCoords" class="mt-3">
       <label class="form-label small text-muted">Vue satellite (1 km x 1 km) — pour confirmer la position</label>
-      <SiteMap :latitude="form.latitude!" :longitude="form.longitude!" />
+      <SiteMap :latitude="form.latitude!" :longitude="form.longitude!" @moved="onMarkerMoved" />
     </div>
 
     <button class="btn btn-link mt-1 p-0" type="button" @click="emit('cancel')">Annuler</button>

@@ -4,6 +4,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 const props = defineProps<{ latitude: string | number; longitude: string | number }>()
+const emit = defineEmits<{ moved: [lat: number, lon: number] }>()
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 let map: L.Map | null = null
@@ -32,7 +33,18 @@ const boundsAroundPoint = (lat: number, lon: number): L.LatLngBoundsExpression =
   ]
 }
 
+// Skip the next render triggered by the latitude/longitude props: after a
+// drag we already emit the new position back up, which flows back down as
+// updated props — re-applying it here would just re-fit the same bounds
+// (harmless but pointless) and fights with the marker's own drag position.
+let skipNextRender = false
+
 const render = () => {
+  if (skipNextRender) {
+    skipNextRender = false
+    return
+  }
+
   const lat = toNumber(props.latitude)
   const lon = toNumber(props.longitude)
   if (lat === null || lon === null || !mapContainer.value) return
@@ -43,7 +55,19 @@ const render = () => {
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       { maxZoom: 19, attribution: 'Esri' }
     ).addTo(map)
-    marker = L.marker([lat, lon], { icon: markerIcon }).addTo(map)
+    // Transparent overlay with place/street/hospital labels on top of the
+    // satellite imagery — Esri's standard "hybrid" pairing for World_Imagery.
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 19, attribution: 'Esri' }
+    ).addTo(map)
+
+    marker = L.marker([lat, lon], { icon: markerIcon, draggable: true }).addTo(map)
+    marker.on('dragend', () => {
+      const position = marker!.getLatLng()
+      skipNextRender = true
+      emit('moved', position.lat, position.lng)
+    })
   } else {
     marker?.setLatLng([lat, lon])
   }
@@ -62,6 +86,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="mapContainer" class="site-map" />
+  <p class="text-muted small mb-0 mt-1">Glissez le point rouge pour ajuster la position.</p>
 </template>
 
 <style scoped>
@@ -83,5 +108,6 @@ onBeforeUnmount(() => {
   background: #dc3545;
   border: 2px solid #fff;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  cursor: grab;
 }
 </style>
