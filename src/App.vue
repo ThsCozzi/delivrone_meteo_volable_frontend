@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { isAuthenticated, logoutUser } from '@/core/auth'
+import { authenticated, logoutUser } from '@/core/auth'
 
 const route = useRoute()
 const router = useRouter()
-
-const authenticated = computed(() => isAuthenticated())
 
 const onLogout = () => {
   logoutUser()

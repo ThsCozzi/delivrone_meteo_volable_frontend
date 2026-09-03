@@ -1,6 +1,14 @@
 import axios from 'axios'
+import { ref } from 'vue'
 
 let refreshPromise: Promise<string | null> | null = null
+
+// Reactive mirror of the access-token presence — localStorage itself isn't
+// tracked by Vue's reactivity, so a `computed` reading isAuthenticated()
+// directly would cache its first (pre-login) result forever within a given
+// SPA session. Anything needing to react to login/logout (e.g. the navbar
+// in App.vue) should read this ref instead of calling isAuthenticated().
+export const authenticated = ref(!!localStorage.getItem('access_token'))
 
 interface JwtPayload {
   exp: number
@@ -38,6 +46,7 @@ export const setTokens = (data: TokenResponse): void => {
   } else {
     localStorage.removeItem('refresh_token')
   }
+  authenticated.value = !!localStorage.getItem('access_token')
 }
 
 export const isAuthenticated = (): boolean => !!localStorage.getItem('access_token')
@@ -84,4 +93,5 @@ export const logoutUser = (): void => {
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   localStorage.removeItem('access_token_exp')
+  authenticated.value = false
 }
