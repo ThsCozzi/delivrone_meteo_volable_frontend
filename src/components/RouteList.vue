@@ -35,6 +35,12 @@ const formatDate = (isoDateTime: string): string =>
     hour: '2-digit',
     minute: '2-digit',
   })
+
+const latestComputedAt = (route: Route): string =>
+  route.latest_results_by_battery.reduce(
+    (latest, r) => (r.computed_at > latest ? r.computed_at : latest),
+    route.latest_results_by_battery[0]?.computed_at ?? ''
+  )
 </script>
 
 <template>
@@ -45,9 +51,8 @@ const formatDate = (isoDateTime: string): string =>
         <th>Origine</th>
         <th>Destination</th>
         <th>Distance (km)</th>
-        <th>% volable</th>
-        <th>Période analysée</th>
-        <th>Drone / Batterie</th>
+        <th>Drone</th>
+        <th>% volable par batterie</th>
         <th>Dernière analyse</th>
         <th></th>
       </tr>
@@ -65,24 +70,23 @@ const formatDate = (isoDateTime: string): string =>
         <td>{{ route.destination_detail?.name }}</td>
         <td>{{ Number(route.distance_km_outbound).toFixed(1) }}</td>
 
-        <template v-if="route.latest_result">
-          <td class="fw-semibold" :class="pctClass(Number(route.latest_result.overall_pct_flyable))">
-            {{ Number(route.latest_result.overall_pct_flyable).toFixed(1) }}%
-          </td>
+        <template v-if="route.latest_results_by_battery.length">
+          <td class="small">{{ route.latest_results_by_battery[0]?.drone_name ?? '—' }}</td>
           <td>
-            {{ daysBetween(route.latest_result.start_date, route.latest_result.end_date) }} j
-            <span class="text-muted small d-block">
-              {{ route.latest_result.start_date }} → {{ route.latest_result.end_date }}
-            </span>
+            <div v-for="r in route.latest_results_by_battery" :key="r.id" class="small mb-1">
+              <span class="text-muted">{{ r.battery_name ?? '—' }} :</span>
+              <span class="fw-semibold" :class="pctClass(Number(r.overall_pct_flyable))">
+                {{ Number(r.overall_pct_flyable).toFixed(1) }}%
+              </span>
+              <span class="text-muted">
+                ({{ daysBetween(r.start_date, r.end_date) }} j, {{ r.start_date }} → {{ r.end_date }})
+              </span>
+            </div>
           </td>
-          <td class="small">
-            {{ route.latest_result.drone_name ?? '—' }}
-            <span class="text-muted d-block">{{ route.latest_result.battery_name ?? '—' }}</span>
-          </td>
-          <td class="text-muted small">{{ formatDate(route.latest_result.computed_at) }}</td>
+          <td class="text-muted small">{{ formatDate(latestComputedAt(route)) }}</td>
         </template>
         <template v-else>
-          <td colspan="4">
+          <td colspan="3">
             <span class="badge bg-secondary-subtle text-secondary-emphasis">Pas encore analysée</span>
           </td>
         </template>

@@ -90,6 +90,7 @@ export interface Route {
   bearing_deg_outbound: string
   bearing_deg_return: string
   latest_result: LatestFlyabilityResult | null
+  latest_results_by_battery: LatestFlyabilityResult[]
   resolved_drone: Drone | null
   created_at: string
   updated_at: string
