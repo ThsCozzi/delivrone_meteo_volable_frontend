@@ -6,6 +6,7 @@ import { useDronesStore } from '@/core/stores/storeDrones'
 import type { Route } from '@/core/types'
 import RouteAnalysisPanel from '@/components/RouteAnalysisPanel.vue'
 import FlyabilityResultsDashboard from '@/components/FlyabilityResultsDashboard.vue'
+import BatteryComparisonTable from '@/components/BatteryComparisonTable.vue'
 
 const props = defineProps<{ id: string }>()
 
@@ -55,9 +56,9 @@ const onSaveProfile = () => saveProfile()
 // (MC/FW distances), not from whatever is currently typed in the form — so
 // save first, otherwise a change made just before clicking "Lancer
 // l'analyse" would silently be ignored.
-const onRun = async (startDate: string, endDate: string, droneId: number | null, batteryId: number | null) => {
+const onRun = async (startDate: string, endDate: string, droneId: number | null) => {
   await saveProfile()
-  resultsStore.runAnalysis(Number(props.id), startDate, endDate, droneId, batteryId)
+  resultsStore.runAnalysis(Number(props.id), startDate, endDate, droneId)
 }
 </script>
 
@@ -131,6 +132,12 @@ const onRun = async (startDate: string, endDate: string, droneId: number | null,
     />
 
     <p v-if="resultsStore.status === 'ERROR'" class="text-danger">{{ resultsStore.errorMessage }}</p>
+    <BatteryComparisonTable
+      v-if="resultsStore.batteryResults.length > 1"
+      :results="resultsStore.batteryResults"
+      :selected-id="resultsStore.currentResult?.id ?? null"
+      @select="resultsStore.selectResult"
+    />
     <FlyabilityResultsDashboard v-if="resultsStore.currentResult" :result="resultsStore.currentResult" />
     <p v-else-if="resultsStore.status !== 'LOADING'" class="text-muted">
       Aucune analyse pour le moment — choisissez une période et lancez l'analyse.

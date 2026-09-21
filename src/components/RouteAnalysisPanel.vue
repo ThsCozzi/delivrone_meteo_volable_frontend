@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { Drone } from '@/core/types'
 
 const props = defineProps<{ loading: boolean; drones: Drone[]; defaultDroneId: number | null }>()
 const emit = defineEmits<{
-  run: [startDate: string, endDate: string, droneId: number | null, batteryId: number | null]
+  run: [startDate: string, endDate: string, droneId: number | null]
 }>()
 
 // Open-Meteo's archive has a data-availability lag, so the latest usable
@@ -23,22 +23,9 @@ const startDate = ref(toIsoDate(defaultStartDate))
 const endDate = ref(maxEndDateIso)
 
 const droneId = ref<number | null>(props.defaultDroneId)
-const batteryId = ref<number | null>(null)
-
-const selectedDroneBatteries = computed(() => {
-  const selectedDrone = props.drones.find((d) => d.id === droneId.value)
-  return selectedDrone?.batteries ?? []
-})
-
-const setDefaultBattery = () => {
-  const defaultBattery = selectedDroneBatteries.value.find((b) => b.is_default) ?? selectedDroneBatteries.value[0]
-  batteryId.value = defaultBattery ? defaultBattery.id : null
-}
-
 watch(() => props.defaultDroneId, (id) => (droneId.value = id))
-watch(droneId, setDefaultBattery, { immediate: true })
 
-const onRun = () => emit('run', startDate.value, endDate.value, droneId.value, batteryId.value)
+const onRun = () => emit('run', startDate.value, endDate.value, droneId.value)
 </script>
 
 <template>
@@ -58,15 +45,10 @@ const onRun = () => emit('run', startDate.value, endDate.value, droneId.value, b
           <option v-for="d in props.drones" :key="d.id" :value="d.id">{{ d.name }}</option>
         </select>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Batterie</label>
-        <select v-model.number="batteryId" class="form-select">
-          <option v-for="battery in selectedDroneBatteries" :key="battery.id" :value="battery.id">
-            {{ battery.name }}
-          </option>
-        </select>
-      </div>
     </div>
+    <p class="text-muted small mt-2 mb-0">
+      L'analyse est calculée pour toutes les batteries configurées sur ce drone en une seule fois.
+    </p>
     <div class="mt-2">
       <button class="btn btn-primary" :disabled="props.loading" @click="onRun">
         {{ props.loading ? 'Analyse en cours...' : "Lancer l'analyse" }}

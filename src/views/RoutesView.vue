@@ -1,11 +1,23 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoutesStore } from '@/core/stores/storeRoutes'
 import { useSitesStore } from '@/core/stores/storeSites'
 import RouteList from '@/components/RouteList.vue'
 
 const routesStore = useRoutesStore()
 const sitesStore = useSitesStore()
+
+const searchQuery = ref('')
+const filteredRoutes = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return routesStore.routes
+  return routesStore.routes.filter(
+    (r) =>
+      r.name.toLowerCase().includes(query) ||
+      r.origin_detail?.name.toLowerCase().includes(query) ||
+      r.destination_detail?.name.toLowerCase().includes(query)
+  )
+})
 
 const showForm = ref(false)
 const originId = ref<number | null>(null)
@@ -93,7 +105,17 @@ const onDelete = async (routeId: number) => {
     <p v-if="error" class="text-danger small mt-2 mb-0">{{ error }}</p>
   </form>
 
+  <div class="mb-3" style="max-width: 400px">
+    <input
+      v-model="searchQuery"
+      type="search"
+      class="form-control"
+      placeholder="Rechercher une ligne (nom, origine, destination)..."
+    />
+  </div>
+
   <p v-if="routesStore.status === 'LOADING'" class="text-muted">Chargement...</p>
   <p v-else-if="routesStore.status === 'ERROR'" class="text-danger">{{ routesStore.errorMessage }}</p>
-  <RouteList v-else :routes="routesStore.routes" @delete="onDelete" />
+  <p v-else-if="!filteredRoutes.length" class="text-muted">Aucune ligne ne correspond à la recherche.</p>
+  <RouteList v-else :routes="filteredRoutes" @delete="onDelete" />
 </template>

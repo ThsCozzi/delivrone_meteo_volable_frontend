@@ -42,10 +42,33 @@ export function useRoutes() {
     return response.data
   }
 
+  const computeAllBatteries = async (
+    id: number,
+    startDate: string,
+    endDate: string,
+    droneId?: number | null
+  ): Promise<FlyabilityResult[]> => {
+    const response = await axios.post<FlyabilityResult[]>(`/api/routes/${id}/compute-all-batteries`, {
+      start_date: startDate,
+      end_date: endDate,
+      drone: droneId ?? null,
+    })
+    return response.data
+  }
+
   const listResults = async (id: number): Promise<FlyabilityResult[]> => {
     const response = await axios.get<Paginated<FlyabilityResult>>(`/api/routes/${id}/results`)
     return response.data.results
   }
 
-  return { listRoutes, getRoute, createRoute, updateRoute, deleteRoute, computeFlyability, listResults }
+  return {
+    listRoutes,
+    getRoute,
+    createRoute,
+    updateRoute,
+    deleteRoute,
+    computeFlyability,
+    computeAllBatteries,
+    listResults,
+  }
 }
