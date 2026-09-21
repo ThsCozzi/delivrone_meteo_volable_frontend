@@ -21,6 +21,13 @@ body {
   background: var(--delivrone-accent);
 }
 
+/* The navbar is fixed-top, so a plain scrollIntoView() aligns content right
+   underneath it, out of view. scroll-padding-top reserves that space for
+   any programmatic or anchor-link scroll in the app. */
+html {
+  scroll-padding-top: calc(var(--app-navbar-height) + 1rem);
+}
+
 .navbar-delivrone {
   background: var(--delivrone-primary);
 }
