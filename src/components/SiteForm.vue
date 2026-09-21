@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import type { Site } from '@/core/types'
 import SiteMap from '@/components/SiteMap.vue'
 
@@ -9,9 +9,28 @@ const emit = defineEmits<{ submit: [payload: Partial<Site>]; cancel: [] }>()
 const blank: Partial<Site> = { name: '', latitude: '', longitude: '', is_active: true }
 const form = reactive<Partial<Site>>({ ...blank, ...props.initial })
 
+const hasValidCoords = computed(() => {
+  const lat = parseFloat(String(form.latitude ?? ''))
+  const lon = parseFloat(String(form.longitude ?? ''))
+  return Number.isFinite(lat) && Number.isFinite(lon)
+})
+
+// Once shown, the map stays mounted even through a momentarily invalid
+// value while editing (e.g. deleting a "." before typing a ","). Gating on
+// hasValidCoords directly would tear down and recreate the whole Leaflet
+// map on every such keystroke — fast typing/deleting can fire enough of
+// these create/destroy cycles in a row to hang the tab.
+const mapVisible = ref(hasValidCoords.value)
+watch(hasValidCoords, (valid) => {
+  if (valid) mapVisible.value = true
+})
+
 watch(
   () => props.initial,
-  (value) => Object.assign(form, blank, value ?? {})
+  (value) => {
+    Object.assign(form, blank, value ?? {})
+    mapVisible.value = hasValidCoords.value
+  }
 )
 
 // The backend stores coordinates with exactly 6 decimal places
@@ -29,12 +48,6 @@ const onSubmit = () => {
     longitude: Number.isFinite(lon) ? lon.toFixed(6) : form.longitude,
   })
 }
-
-const hasValidCoords = computed(() => {
-  const lat = parseFloat(String(form.latitude ?? ''))
-  const lon = parseFloat(String(form.longitude ?? ''))
-  return Number.isFinite(lat) && Number.isFinite(lon)
-})
 
 const onMarkerMoved = (lat: number, lon: number) => {
   form.latitude = lat.toFixed(6)
@@ -62,7 +75,7 @@ const onMarkerMoved = (lat: number, lon: number) => {
       </div>
     </div>
 
-    <div v-if="hasValidCoords" class="mt-3">
+    <div v-if="mapVisible" class="mt-3">
       <label class="form-label small text-muted">Vue satellite (1 km x 1 km) — pour confirmer la position</label>
       <SiteMap :latitude="form.latitude!" :longitude="form.longitude!" @moved="onMarkerMoved" />
     </div>
