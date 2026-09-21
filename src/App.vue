@@ -18,6 +18,7 @@ const onLogout = () => {
       <RouterLink class="nav-link" :to="{ name: 'routes' }">Lignes</RouterLink>
       <RouterLink class="nav-link" :to="{ name: 'drones' }">Drones</RouterLink>
       <RouterLink class="nav-link" :to="{ name: 'sites' }">Sites</RouterLink>
+      <RouterLink class="nav-link" :to="{ name: 'help' }">Aide</RouterLink>
     </div>
     <button class="btn btn-outline-light btn-sm ms-auto" @click="onLogout">Déconnexion</button>
   </nav>

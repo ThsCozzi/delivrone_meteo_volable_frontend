@@ -34,6 +34,12 @@ const router = createRouter({
       component: () => import('@/views/SitesView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/aide',
+      name: 'help',
+      component: () => import('@/views/HelpView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 
