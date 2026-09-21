@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { FlyabilityResult, Paginated, Route } from '@/core/types'
+import type { BatteryBudget, FlyabilityResult, Paginated, Route } from '@/core/types'
 
 export function useRoutes() {
   const listRoutes = async (): Promise<Route[]> => {
@@ -61,6 +61,13 @@ export function useRoutes() {
     return response.data.results
   }
 
+  const getBatteryBudget = async (id: number, droneId?: number | null): Promise<BatteryBudget[]> => {
+    const response = await axios.get<BatteryBudget[]>(`/api/routes/${id}/battery-budget`, {
+      params: droneId ? { drone: droneId } : undefined,
+    })
+    return response.data
+  }
+
   return {
     listRoutes,
     getRoute,
@@ -70,5 +77,6 @@ export function useRoutes() {
     computeFlyability,
     computeAllBatteries,
     listResults,
+    getBatteryBudget,
   }
 }

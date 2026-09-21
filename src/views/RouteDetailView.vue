@@ -3,18 +3,20 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRoutes } from '@/core/composables/useRoutes'
 import { useResultsStore } from '@/core/stores/storeResults'
 import { useDronesStore } from '@/core/stores/storeDrones'
-import type { Route } from '@/core/types'
+import type { BatteryBudget, Route } from '@/core/types'
 import RouteAnalysisPanel from '@/components/RouteAnalysisPanel.vue'
 import FlyabilityResultsDashboard from '@/components/FlyabilityResultsDashboard.vue'
 import BatteryComparisonTable from '@/components/BatteryComparisonTable.vue'
+import BatteryBudgetTable from '@/components/BatteryBudgetTable.vue'
 
 const props = defineProps<{ id: string }>()
 
-const { getRoute, updateRoute } = useRoutes()
+const { getRoute, updateRoute, getBatteryBudget } = useRoutes()
 const resultsStore = useResultsStore()
 const dronesStore = useDronesStore()
 
 const route = ref<Route | null>(null)
+const batteryBudgets = ref<BatteryBudget[]>([])
 const profileForm = reactive({
   mcOrigin: '0.1',
   mcDestination: '0.1',
@@ -22,6 +24,15 @@ const profileForm = reactive({
   fwDistance: '0',
 })
 const savingProfile = ref(false)
+
+const refreshBatteryBudget = async () => {
+  if (!route.value) return
+  try {
+    batteryBudgets.value = await getBatteryBudget(Number(props.id), route.value.resolved_drone?.id ?? null)
+  } catch {
+    batteryBudgets.value = []
+  }
+}
 
 onMounted(async () => {
   const [fetchedRoute] = await Promise.all([
@@ -34,6 +45,7 @@ onMounted(async () => {
   profileForm.mcDestination = fetchedRoute.mc_distance_km_destination
   profileForm.fwIsCustom = fetchedRoute.fw_distance_km !== null
   profileForm.fwDistance = fetchedRoute.fw_distance_km ?? fetchedRoute.resolved_fw_distance_km
+  await refreshBatteryBudget()
 })
 
 const saveProfile = async () => {
@@ -45,6 +57,7 @@ const saveProfile = async () => {
       fw_distance_km: profileForm.fwIsCustom ? profileForm.fwDistance : null,
     })
     profileForm.fwDistance = route.value.fw_distance_km ?? route.value.resolved_fw_distance_km
+    await refreshBatteryBudget()
   } finally {
     savingProfile.value = false
   }
@@ -119,6 +132,13 @@ const onRun = async (startDate: string, endDate: string, droneId: number | null)
         </button>
       </div>
     </div>
+
+    <BatteryBudgetTable
+      v-if="batteryBudgets.length"
+      :budgets="batteryBudgets"
+      :origin-name="route.origin_detail?.name"
+      :destination-name="route.destination_detail?.name"
+    />
 
     <p v-if="!dronesStore.drones.length" class="text-danger small">
       Aucun drone configuré — ajoutez-en un dans la page Drones avant de lancer une analyse.

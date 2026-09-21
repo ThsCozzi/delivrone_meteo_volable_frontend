@@ -96,6 +96,28 @@ export interface Route {
   updated_at: string
 }
 
+export interface LegConsumptionBreakdown {
+  takeoff_ah: number
+  mc_horizontal_ah: number
+  transition_ah: number
+  fw_cruise_ah: number
+  landing_ah: number
+  total_ah: number
+}
+
+export interface BatteryBudget {
+  battery: number
+  battery_name: string
+  capacity_ah: number
+  land_floor_ah: number
+  emergency_reserve_ah: number
+  usable_capacity_ah: number
+  outbound: LegConsumptionBreakdown
+  return: LegConsumptionBreakdown
+  outbound_margin_ah: number
+  return_margin_ah: number
+}
+
 export interface TimeslotBreakdown {
   total_hours: number
   flyable_hours: number
