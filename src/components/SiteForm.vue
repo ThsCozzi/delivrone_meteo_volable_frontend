@@ -14,7 +14,21 @@ watch(
   (value) => Object.assign(form, blank, value ?? {})
 )
 
-const onSubmit = () => emit('submit', { ...form })
+// The backend stores coordinates with exactly 6 decimal places
+// (DecimalField(max_digits=9, decimal_places=6)) and rejects anything more
+// precise. Coordinates pasted from Google Maps etc. often carry far more
+// decimals, so round here — the same rounding onMarkerMoved already applies
+// when the red dot is dragged — instead of forwarding the raw typed value
+// and letting the save fail.
+const onSubmit = () => {
+  const lat = parseFloat(String(form.latitude ?? ''))
+  const lon = parseFloat(String(form.longitude ?? ''))
+  emit('submit', {
+    ...form,
+    latitude: Number.isFinite(lat) ? lat.toFixed(6) : form.latitude,
+    longitude: Number.isFinite(lon) ? lon.toFixed(6) : form.longitude,
+  })
+}
 
 const hasValidCoords = computed(() => {
   const lat = parseFloat(String(form.latitude ?? ''))
