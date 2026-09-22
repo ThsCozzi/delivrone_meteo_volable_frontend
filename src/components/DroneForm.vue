@@ -16,12 +16,12 @@ const blank: Partial<Drone> = {
   battery_max_voltage_v: '50.40',
   land_min_soc_pct: '30',
   emergency_reserve_distance_km: '1.0',
-  cruise_current_a: '17.46',
-  mc_current_a: '90.00',
   mc_speed_ms: '5.00',
-  takeoff_duration_min: '1.00',
-  transition_duration_min: '0.50',
-  landing_duration_min: '1.00',
+  takeoff_ah: '1.450',
+  landing_ah: '1.263',
+  transition_ah: '0.200',
+  mc_rate_ah_per_min: '1.296',
+  fw_rate_ah_per_min: '0.276',
   cruise_airspeed_ms: '29.44',
   wind_limit_ms: '12.00',
   rain_limit_mmh: '5.00',
@@ -88,28 +88,28 @@ const onSubmit = () => emit('submit', { ...form })
         <input v-model="form.emergency_reserve_distance_km" class="form-control" required />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Courant croisière (A)</label>
-        <input v-model="form.cruise_current_a" class="form-control" required />
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Courant multicoptère (A)</label>
-        <input v-model="form.mc_current_a" class="form-control" required />
-      </div>
-      <div class="col-md-3">
         <label class="form-label">Vitesse multicoptère (m/s)</label>
         <input v-model="form.mc_speed_ms" class="form-control" required />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Décollage (min)</label>
-        <input v-model="form.takeoff_duration_min" class="form-control" required />
+        <label class="form-label">Décollage (Ah, coût fixe)</label>
+        <input v-model="form.takeoff_ah" class="form-control" required />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Transition (min)</label>
-        <input v-model="form.transition_duration_min" class="form-control" required />
+        <label class="form-label">Atterrissage (Ah, coût fixe)</label>
+        <input v-model="form.landing_ah" class="form-control" required />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Atterrissage (min)</label>
-        <input v-model="form.landing_duration_min" class="form-control" required />
+        <label class="form-label">Transition MC/FW (Ah, coût fixe)</label>
+        <input v-model="form.transition_ah" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Conso multicoptère (Ah/min)</label>
+        <input v-model="form.mc_rate_ah_per_min" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Conso croisière voilure fixe (Ah/min)</label>
+        <input v-model="form.fw_rate_ah_per_min" class="form-control" required />
       </div>
 
       <div class="col-12"><hr class="my-2" /><strong>Givrage</strong></div>

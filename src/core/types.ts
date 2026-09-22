@@ -25,12 +25,12 @@ export interface Drone {
   battery_max_voltage_v: string
   land_min_soc_pct: string
   emergency_reserve_distance_km: string
-  cruise_current_a: string
-  mc_current_a: string
   mc_speed_ms: string
-  takeoff_duration_min: string
-  transition_duration_min: string
-  landing_duration_min: string
+  takeoff_ah: string
+  landing_ah: string
+  transition_ah: string
+  mc_rate_ah_per_min: string
+  fw_rate_ah_per_min: string
   cruise_airspeed_ms: string
   stall_speed_ms_min: string | null
   stall_speed_ms_max: string | null
