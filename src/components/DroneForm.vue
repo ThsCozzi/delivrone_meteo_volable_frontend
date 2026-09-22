@@ -16,6 +16,7 @@ const blank: Partial<Drone> = {
   battery_max_voltage_v: '50.40',
   land_min_soc_pct: '30',
   emergency_reserve_distance_km: '1.0',
+  emergency_min_soc_pct: '20',
   mc_speed_ms: '5.00',
   takeoff_ah: '1.450',
   landing_ah: '1.263',
@@ -86,6 +87,10 @@ const onSubmit = () => emit('submit', { ...form })
       <div class="col-md-3">
         <label class="form-label">Réserve d'urgence (km, retour rallypoint en MC)</label>
         <input v-model="form.emergency_reserve_distance_km" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">SoC min en urgence (%, rallypoint)</label>
+        <input v-model="form.emergency_min_soc_pct" class="form-control" required />
       </div>
       <div class="col-md-3">
         <label class="form-label">Vitesse multicoptère (m/s)</label>

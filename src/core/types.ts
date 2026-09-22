@@ -25,6 +25,7 @@ export interface Drone {
   battery_max_voltage_v: string
   land_min_soc_pct: string
   emergency_reserve_distance_km: string
+  emergency_min_soc_pct: string
   mc_speed_ms: string
   takeoff_ah: string
   landing_ah: string
