@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Trash2 } from 'lucide-vue-next'
+import { Play, Trash2 } from 'lucide-vue-next'
 import type { Route } from '@/core/types'
 
-defineProps<{ routes: Route[] }>()
-const emit = defineEmits<{ delete: [routeId: number] }>()
+defineProps<{ routes: Route[]; analyzingIds: Set<number> }>()
+const emit = defineEmits<{ delete: [routeId: number]; analyze: [routeId: number] }>()
 
 const router = useRouter()
 
@@ -47,6 +47,7 @@ const latestComputedAt = (route: Route): string =>
   <table class="table table-hover bg-white">
     <thead>
       <tr>
+        <th></th>
         <th>Ligne</th>
         <th>Origine</th>
         <th>Destination</th>
@@ -65,6 +66,17 @@ const latestComputedAt = (route: Route): string =>
         style="cursor: pointer"
         @click="goToDetail(route.id)"
       >
+        <td>
+          <button
+            class="btn btn-sm btn-outline-primary"
+            title="Lancer l'analyse (toutes batteries, période par défaut)"
+            :disabled="analyzingIds.has(route.id)"
+            @click.stop="emit('analyze', route.id)"
+          >
+            <span v-if="analyzingIds.has(route.id)" class="spinner-border spinner-border-sm" />
+            <Play v-else :size="16" />
+          </button>
+        </td>
         <td>{{ route.name }}</td>
         <td>{{ route.origin_detail?.name }}</td>
         <td>{{ route.destination_detail?.name }}</td>
@@ -102,7 +114,7 @@ const latestComputedAt = (route: Route): string =>
         </td>
       </tr>
       <tr v-if="!routes.length">
-        <td colspan="8" class="text-center text-muted py-4">Aucune ligne pour le moment.</td>
+        <td colspan="9" class="text-center text-muted py-4">Aucune ligne pour le moment.</td>
       </tr>
     </tbody>
   </table>

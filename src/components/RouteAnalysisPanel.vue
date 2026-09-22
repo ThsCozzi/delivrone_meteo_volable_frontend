@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { Drone } from '@/core/types'
+import { defaultAnalysisRangeIso, defaultAnalysisEndDate, toIsoDate } from '@/core/defaultAnalysisRange'
 
 const props = defineProps<{ loading: boolean; drones: Drone[]; defaultDroneId: number | null }>()
 const emit = defineEmits<{
   run: [startDate: string, endDate: string, droneId: number | null]
 }>()
 
-// Open-Meteo's archive has a data-availability lag, so the latest usable
-// end date is a few days behind today — default to 10 days back, and cap
-// the date picker there too. Default analysis window: 2 years.
-const toIsoDate = (date: Date) => date.toISOString().slice(0, 10)
-
-const maxEndDate = new Date()
-maxEndDate.setDate(maxEndDate.getDate() - 10)
-
-const defaultStartDate = new Date(maxEndDate)
-defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 2)
-
-const maxEndDateIso = toIsoDate(maxEndDate)
-const startDate = ref(toIsoDate(defaultStartDate))
-const endDate = ref(maxEndDateIso)
+const maxEndDateIso = toIsoDate(defaultAnalysisEndDate())
+const { startDate: defaultStartIso, endDate: defaultEndIso } = defaultAnalysisRangeIso()
+const startDate = ref(defaultStartIso)
+const endDate = ref(defaultEndIso)
 
 const droneId = ref<number | null>(props.defaultDroneId)
 watch(() => props.defaultDroneId, (id) => (droneId.value = id))

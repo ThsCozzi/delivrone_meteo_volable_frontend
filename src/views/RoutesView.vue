@@ -2,10 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoutesStore } from '@/core/stores/storeRoutes'
 import { useSitesStore } from '@/core/stores/storeSites'
+import { useRoutes } from '@/core/composables/useRoutes'
+import { defaultAnalysisRangeIso } from '@/core/defaultAnalysisRange'
 import RouteList from '@/components/RouteList.vue'
 
 const routesStore = useRoutesStore()
 const sitesStore = useSitesStore()
+const { computeAllBatteries } = useRoutes()
 
 const searchQuery = ref('')
 const filteredRoutes = computed(() => {
@@ -62,6 +65,29 @@ const onDelete = async (routeId: number) => {
     error.value = "Impossible de supprimer la ligne."
   }
 }
+
+const analyzingIds = ref<Set<number>>(new Set())
+
+// Quick-analyze from the list: runs with the same defaults as the detail
+// page's panel (all batteries of the route's resolved drone, default 2-year
+// window), no picker — for re-running a route the user already trusts the
+// settings of, without opening its detail page.
+const onAnalyze = async (routeId: number) => {
+  const route = routesStore.routes.find((r) => r.id === routeId)
+  const droneId = route?.resolved_drone?.id ?? null
+  error.value = null
+  analyzingIds.value.add(routeId)
+  try {
+    const { startDate, endDate } = defaultAnalysisRangeIso()
+    await computeAllBatteries(routeId, startDate, endDate, droneId)
+    await routesStore.fetchRoutes()
+  } catch (err: any) {
+    error.value =
+      err?.response?.data?.detail || `Échec de l'analyse pour "${route?.name ?? routeId}".`
+  } finally {
+    analyzingIds.value.delete(routeId)
+  }
+}
 </script>
 
 <template>
@@ -114,8 +140,16 @@ const onDelete = async (routeId: number) => {
     />
   </div>
 
+  <p v-if="error && !showForm" class="text-danger small">{{ error }}</p>
+
   <p v-if="routesStore.status === 'LOADING'" class="text-muted">Chargement...</p>
   <p v-else-if="routesStore.status === 'ERROR'" class="text-danger">{{ routesStore.errorMessage }}</p>
   <p v-else-if="!filteredRoutes.length" class="text-muted">Aucune ligne ne correspond à la recherche.</p>
-  <RouteList v-else :routes="filteredRoutes" @delete="onDelete" />
+  <RouteList
+    v-else
+    :routes="filteredRoutes"
+    :analyzing-ids="analyzingIds"
+    @delete="onDelete"
+    @analyze="onAnalyze"
+  />
 </template>
