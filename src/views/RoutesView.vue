@@ -80,7 +80,7 @@ const onAnalyze = async (routeId: number) => {
   try {
     const { startDate, endDate } = defaultAnalysisRangeIso()
     await computeAllBatteries(routeId, startDate, endDate, droneId)
-    await routesStore.fetchRoutes()
+    await routesStore.refreshRoute(routeId)
   } catch (err: any) {
     error.value =
       err?.response?.data?.detail || `Échec de l'analyse pour "${route?.name ?? routeId}".`

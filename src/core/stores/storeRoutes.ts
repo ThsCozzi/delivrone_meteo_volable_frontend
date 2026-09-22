@@ -4,7 +4,7 @@ import { useRoutes } from '@/core/composables/useRoutes'
 import type { Route } from '@/core/types'
 
 export const useRoutesStore = defineStore('routes', () => {
-  const { listRoutes, createRoute, updateRoute, deleteRoute } = useRoutes()
+  const { listRoutes, getRoute, createRoute, updateRoute, deleteRoute } = useRoutes()
 
   const routes = ref<Route[]>([])
   const status = ref<'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'>('IDLE')
@@ -19,6 +19,16 @@ export const useRoutesStore = defineStore('routes', () => {
       status.value = 'ERROR'
       errorMessage.value = (error as Error).message
     }
+  }
+
+  // Updates a single row in place (e.g. after a quick-analyze from the
+  // list) without touching `status` — going through fetchRoutes() would
+  // briefly swap the whole table for a "Chargement..." placeholder, which
+  // collapses the page's scroll position back to the top.
+  const refreshRoute = async (id: number): Promise<void> => {
+    const updated = await getRoute(id)
+    const index = routes.value.findIndex((r) => r.id === id)
+    if (index !== -1) routes.value[index] = updated
   }
 
   const addRoute = async (payload: Partial<Route>): Promise<Route> => {
@@ -38,5 +48,5 @@ export const useRoutesStore = defineStore('routes', () => {
     routes.value = routes.value.filter((r) => r.id !== id)
   }
 
-  return { routes, status, errorMessage, fetchRoutes, addRoute, editRoute, removeRoute }
+  return { routes, status, errorMessage, fetchRoutes, refreshRoute, addRoute, editRoute, removeRoute }
 })
