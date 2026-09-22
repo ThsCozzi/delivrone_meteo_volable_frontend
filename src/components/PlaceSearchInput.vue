@@ -2,6 +2,16 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
+// Isolated from the app's default axios instance (configured in main.ts with
+// a baseURL pointing at our own API, plus request/response interceptors that
+// inject/refresh our JWT on every request). Reusing that instance here meant
+// every geocoding lookup silently awaited our own token refresh logic and
+// carried an `Authorization: Bearer <our JWT>` header to this third-party
+// API — any hiccup in that unrelated logic (e.g. a slow/failing refresh)
+// rejected the whole request and was swallowed by the catch-all below,
+// surfacing as a false "no results" even for cities the API does return.
+const geocodingClient = axios.create()
+
 const emit = defineEmits<{ select: [lat: number, lon: number, label: string] }>()
 
 interface GeocodingResult {
@@ -60,7 +70,7 @@ const stripInstitutionPrefix = (raw: string): string => {
 }
 
 const fetchResults = async (name: string): Promise<GeocodingResult[]> => {
-  const response = await axios.get<{ results?: GeocodingResult[] }>(GEOCODING_URL, {
+  const response = await geocodingClient.get<{ results?: GeocodingResult[] }>(GEOCODING_URL, {
     params: { name, count: 8, language: 'fr', format: 'json' },
   })
   return response.data.results ?? []
@@ -84,7 +94,8 @@ const search = async () => {
     }
     results.value = found
     showResults.value = true
-  } catch {
+  } catch (err) {
+    console.error('Geocoding search failed:', err)
     results.value = []
     showResults.value = true
   } finally {
