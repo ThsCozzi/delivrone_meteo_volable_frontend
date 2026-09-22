@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .site-map {
-  height: 260px;
+  height: 350px;
   border-radius: var(--delivrone-border-radius, 0.25rem);
 }
 </style>
