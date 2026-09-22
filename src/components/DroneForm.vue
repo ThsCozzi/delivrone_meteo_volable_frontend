@@ -18,11 +18,12 @@ const blank: Partial<Drone> = {
   emergency_reserve_distance_km: '1.0',
   emergency_min_soc_pct: '20',
   mc_speed_ms: '5.00',
-  takeoff_ah: '1.450',
-  landing_ah: '1.263',
-  transition_ah: '0.200',
+  takeoff_ah: '1.710',
+  landing_ah: '1.360',
+  transition_out_ah: '0.400',
+  transition_in_ah: '0.060',
   mc_rate_ah_per_min: '1.296',
-  fw_rate_ah_per_min: '0.276',
+  fw_rate_ah_per_min: '0.320',
   cruise_airspeed_ms: '29.44',
   wind_limit_ms: '12.00',
   rain_limit_mmh: '5.00',
@@ -105,8 +106,12 @@ const onSubmit = () => emit('submit', { ...form })
         <input v-model="form.landing_ah" class="form-control" required />
       </div>
       <div class="col-md-3">
-        <label class="form-label">Transition MC/FW (Ah, coût fixe)</label>
-        <input v-model="form.transition_ah" class="form-control" required />
+        <label class="form-label">Transition MC→FW (Ah, coût fixe, au décollage)</label>
+        <input v-model="form.transition_out_ah" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Transition FW→MC (Ah, coût fixe, avant atterrissage)</label>
+        <input v-model="form.transition_in_ah" class="form-control" required />
       </div>
       <div class="col-md-3">
         <label class="form-label">Conso multicoptère (Ah/min)</label>

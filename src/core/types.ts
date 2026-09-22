@@ -29,7 +29,8 @@ export interface Drone {
   mc_speed_ms: string
   takeoff_ah: string
   landing_ah: string
-  transition_ah: string
+  transition_out_ah: string
+  transition_in_ah: string
   mc_rate_ah_per_min: string
   fw_rate_ah_per_min: string
   cruise_airspeed_ms: string
