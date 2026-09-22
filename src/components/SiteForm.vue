@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import type { Site } from '@/core/types'
 import SiteMap from '@/components/SiteMap.vue'
+import PlaceSearchInput from '@/components/PlaceSearchInput.vue'
 
 const props = defineProps<{ initial?: Partial<Site> }>()
 const emit = defineEmits<{ submit: [payload: Partial<Site>]; cancel: [] }>()
@@ -53,10 +54,20 @@ const onMarkerMoved = (lat: number, lon: number) => {
   form.latitude = lat.toFixed(6)
   form.longitude = lon.toFixed(6)
 }
+
+const onPlaceSelected = (lat: number, lon: number, label: string) => {
+  form.latitude = lat.toFixed(6)
+  form.longitude = lon.toFixed(6)
+  if (!form.name) form.name = label
+}
 </script>
 
 <template>
   <form class="card p-3" @submit.prevent="onSubmit">
+    <div class="mb-2">
+      <PlaceSearchInput @select="onPlaceSelected" />
+    </div>
+
     <div class="row g-2 align-items-end">
       <div class="col-md-4">
         <label class="form-label">Nom</label>
