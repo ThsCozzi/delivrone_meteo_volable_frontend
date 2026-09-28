@@ -27,6 +27,7 @@ export interface Drone {
   emergency_reserve_distance_km: string
   emergency_min_soc_pct: string
   mc_speed_ms: string
+  holds_ground_speed: boolean
   takeoff_ah: string
   landing_ah: string
   transition_out_ah: string

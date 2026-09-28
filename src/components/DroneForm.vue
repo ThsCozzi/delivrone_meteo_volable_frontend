@@ -18,6 +18,7 @@ const blank: Partial<Drone> = {
   emergency_reserve_distance_km: '1.0',
   emergency_min_soc_pct: '20',
   mc_speed_ms: '5.00',
+  holds_ground_speed: false,
   takeoff_ah: '1.710',
   landing_ah: '1.360',
   transition_out_ah: '0.400',
@@ -120,6 +121,20 @@ const onSubmit = () => emit('submit', { ...form })
       <div class="col-md-3">
         <label class="form-label">Conso croisière voilure fixe (Ah/min)</label>
         <input v-model="form.fw_rate_ah_per_min" class="form-control" required />
+      </div>
+      <div class="col-md-6 d-flex align-items-end">
+        <div class="form-check">
+          <input
+            id="holds_ground_speed"
+            v-model="form.holds_ground_speed"
+            type="checkbox"
+            class="form-check-input"
+          />
+          <label class="form-check-label" for="holds_ground_speed">
+            Vitesse de croisière = vitesse sol maintenue constante (multicoptère type Tundra, pas voilure fixe) —
+            le temps de vol ne varie alors pas avec le vent, contrairement au modèle voilure fixe par défaut
+          </label>
+        </div>
       </div>
 
       <div class="col-12"><hr class="my-2" /><strong>Givrage</strong></div>
