@@ -1,12 +1,21 @@
 <script setup lang="ts">
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Play, Trash2 } from 'lucide-vue-next'
-import type { Route } from '@/core/types'
+import type { Drone, Route } from '@/core/types'
 
-defineProps<{ routes: Route[]; analyzingIds: Set<number> }>()
-const emit = defineEmits<{ delete: [routeId: number]; analyze: [routeId: number] }>()
+defineProps<{ routes: Route[]; drones: Drone[]; analyzingIds: Set<number> }>()
+const emit = defineEmits<{ delete: [routeId: number]; analyze: [routeId: number, droneId: number | null] }>()
 
 const router = useRouter()
+
+// Which drone to run the quick-analyze with, per route — defaults to the
+// route's own resolved drone (its assignment, or the app-wide default) but
+// lets the user override it right from this table instead of only being
+// able to pick a drone from the route's own detail page.
+const selectedDroneId = reactive<Record<number, number | null>>({})
+const droneIdFor = (route: Route): number | null =>
+  selectedDroneId[route.id] !== undefined ? selectedDroneId[route.id] : (route.resolved_drone?.id ?? null)
 
 const goToDetail = (routeId: number) => {
   router.push({ name: 'route-detail', params: { id: routeId } })
@@ -69,9 +78,9 @@ const latestComputedAt = (route: Route): string =>
         <td>
           <button
             class="btn btn-sm btn-outline-primary"
-            title="Lancer l'analyse (toutes batteries, période par défaut)"
+            title="Lancer l'analyse (batteries du drone choisi, période par défaut)"
             :disabled="analyzingIds.has(route.id)"
-            @click.stop="emit('analyze', route.id)"
+            @click.stop="emit('analyze', route.id, droneIdFor(route))"
           >
             <span v-if="analyzingIds.has(route.id)" class="spinner-border spinner-border-sm" />
             <Play v-else :size="16" />
@@ -81,9 +90,18 @@ const latestComputedAt = (route: Route): string =>
         <td>{{ route.origin_detail?.name }}</td>
         <td>{{ route.destination_detail?.name }}</td>
         <td>{{ Number(route.distance_km_outbound).toFixed(1) }}</td>
+        <td @click.stop>
+          <select
+            class="form-select form-select-sm"
+            style="min-width: 8rem"
+            :value="droneIdFor(route)"
+            @change="selectedDroneId[route.id] = ($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null"
+          >
+            <option v-for="d in drones" :key="d.id" :value="d.id">{{ d.name }}</option>
+          </select>
+        </td>
 
         <template v-if="route.latest_results_by_battery.length">
-          <td class="small">{{ route.latest_results_by_battery[0]?.drone_name ?? '—' }}</td>
           <td>
             <div v-for="r in route.latest_results_by_battery" :key="r.id" class="small mb-1">
               <span class="text-muted">{{ r.battery_name ?? '—' }} :</span>
@@ -98,7 +116,7 @@ const latestComputedAt = (route: Route): string =>
           <td class="text-muted small">{{ formatDate(latestComputedAt(route)) }}</td>
         </template>
         <template v-else>
-          <td colspan="3">
+          <td colspan="2">
             <span class="badge bg-secondary-subtle text-secondary-emphasis">Pas encore analysée</span>
           </td>
         </template>

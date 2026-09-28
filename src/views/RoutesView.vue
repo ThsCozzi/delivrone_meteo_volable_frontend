@@ -2,12 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoutesStore } from '@/core/stores/storeRoutes'
 import { useSitesStore } from '@/core/stores/storeSites'
+import { useDronesStore } from '@/core/stores/storeDrones'
 import { useRoutes } from '@/core/composables/useRoutes'
 import { defaultAnalysisRangeIso } from '@/core/defaultAnalysisRange'
 import RouteList from '@/components/RouteList.vue'
 
 const routesStore = useRoutesStore()
 const sitesStore = useSitesStore()
+const dronesStore = useDronesStore()
 const { computeAllBatteries } = useRoutes()
 
 const searchQuery = ref('')
@@ -33,6 +35,7 @@ const error = ref<string | null>(null)
 onMounted(() => {
   routesStore.fetchRoutes()
   sitesStore.fetchSites()
+  dronesStore.fetchDrones()
 })
 
 const onCreate = async () => {
@@ -69,12 +72,13 @@ const onDelete = async (routeId: number) => {
 const analyzingIds = ref<Set<number>>(new Set())
 
 // Quick-analyze from the list: runs with the same defaults as the detail
-// page's panel (all batteries of the route's resolved drone, default 2-year
-// window), no picker — for re-running a route the user already trusts the
-// settings of, without opening its detail page.
-const onAnalyze = async (routeId: number) => {
+// page's panel (all batteries of the chosen drone, default 2-year window) —
+// no date-range picker, but the drone is now chosen per-row directly in
+// RouteList (defaults to the route's resolved drone), for re-running a
+// route the user already trusts the settings of, without opening its
+// detail page just to switch drones.
+const onAnalyze = async (routeId: number, droneId: number | null) => {
   const route = routesStore.routes.find((r) => r.id === routeId)
-  const droneId = route?.resolved_drone?.id ?? null
   error.value = null
   analyzingIds.value.add(routeId)
   try {
@@ -148,6 +152,7 @@ const onAnalyze = async (routeId: number) => {
   <RouteList
     v-else
     :routes="filteredRoutes"
+    :drones="dronesStore.drones"
     :analyzing-ids="analyzingIds"
     @delete="onDelete"
     @analyze="onAnalyze"
