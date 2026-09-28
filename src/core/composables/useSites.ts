@@ -1,11 +1,9 @@
 import axios from 'axios'
-import type { Paginated, Site } from '@/core/types'
+import { fetchAllPages } from '@/core/fetchAllPages'
+import type { Site } from '@/core/types'
 
 export function useSites() {
-  const listSites = async (): Promise<Site[]> => {
-    const response = await axios.get<Paginated<Site>>('/api/sites')
-    return response.data.results
-  }
+  const listSites = (): Promise<Site[]> => fetchAllPages<Site>('/api/sites')
 
   const createSite = async (payload: Partial<Site>): Promise<Site> => {
     const response = await axios.post<Site>('/api/sites', payload)

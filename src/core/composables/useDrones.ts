@@ -1,11 +1,9 @@
 import axios from 'axios'
-import type { Drone, Paginated } from '@/core/types'
+import { fetchAllPages } from '@/core/fetchAllPages'
+import type { Drone } from '@/core/types'
 
 export function useDrones() {
-  const listDrones = async (): Promise<Drone[]> => {
-    const response = await axios.get<Paginated<Drone>>('/api/drones')
-    return response.data.results
-  }
+  const listDrones = (): Promise<Drone[]> => fetchAllPages<Drone>('/api/drones')
 
   const getDrone = async (id: number): Promise<Drone> => {
     const response = await axios.get<Drone>(`/api/drones/${id}`)

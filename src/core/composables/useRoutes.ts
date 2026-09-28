@@ -1,11 +1,9 @@
 import axios from 'axios'
+import { fetchAllPages } from '@/core/fetchAllPages'
 import type { BatteryBudget, FlyabilityResult, Paginated, Route } from '@/core/types'
 
 export function useRoutes() {
-  const listRoutes = async (): Promise<Route[]> => {
-    const response = await axios.get<Paginated<Route>>('/api/routes')
-    return response.data.results
-  }
+  const listRoutes = (): Promise<Route[]> => fetchAllPages<Route>('/api/routes')
 
   const getRoute = async (id: number): Promise<Route> => {
     const response = await axios.get<Route>(`/api/routes/${id}`)
