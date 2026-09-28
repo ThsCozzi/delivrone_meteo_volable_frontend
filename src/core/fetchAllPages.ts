@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { type AxiosResponse } from 'axios'
 import type { Paginated } from '@/core/types'
 
 // The API paginates list endpoints at 50 items per page (see
@@ -13,7 +13,7 @@ export async function fetchAllPages<T>(url: string): Promise<T[]> {
   const results: T[] = []
   let next: string | null = url
   while (next) {
-    const response = await axios.get<Paginated<T>>(next)
+    const response: AxiosResponse<Paginated<T>> = await axios.get<Paginated<T>>(next)
     results.push(...response.data.results)
     next = response.data.next
   }
