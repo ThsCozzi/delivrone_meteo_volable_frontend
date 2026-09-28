@@ -104,7 +104,7 @@ const latestComputedAt = (route: Route): string =>
         <template v-if="route.latest_results_by_battery.length">
           <td>
             <div v-for="r in route.latest_results_by_battery" :key="r.id" class="small mb-1">
-              <span class="text-muted">{{ r.battery_name ?? '—' }} :</span>
+              <span class="text-muted">{{ r.drone_name ?? '—' }} · {{ r.battery_name ?? '—' }} :</span>
               <span class="fw-semibold" :class="pctClass(Number(r.overall_pct_flyable))">
                 {{ Number(r.overall_pct_flyable).toFixed(1) }}%
               </span>
