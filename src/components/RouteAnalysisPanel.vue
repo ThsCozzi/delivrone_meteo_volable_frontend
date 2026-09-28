@@ -6,6 +6,11 @@ import { defaultAnalysisRangeIso, defaultAnalysisEndDate, toIsoDate } from '@/co
 const props = defineProps<{ loading: boolean; drones: Drone[]; defaultDroneId: number | null }>()
 const emit = defineEmits<{
   run: [startDate: string, endDate: string, droneId: number | null]
+  // Fired whenever the drone picker changes, including on initial mount —
+  // the battery-budget preview above this panel needs to track it live,
+  // not just whatever drone was selected the last time "Lancer l'analyse"
+  // ran.
+  droneChange: [droneId: number | null]
 }>()
 
 const maxEndDateIso = toIsoDate(defaultAnalysisEndDate())
@@ -15,6 +20,7 @@ const endDate = ref(defaultEndIso)
 
 const droneId = ref<number | null>(props.defaultDroneId)
 watch(() => props.defaultDroneId, (id) => (droneId.value = id))
+watch(droneId, (id) => emit('droneChange', id), { immediate: true })
 
 const onRun = () => emit('run', startDate.value, endDate.value, droneId.value)
 </script>

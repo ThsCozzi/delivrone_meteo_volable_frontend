@@ -25,13 +25,24 @@ const profileForm = reactive({
 })
 const savingProfile = ref(false)
 
+// Tracks whatever drone is currently picked in RouteAnalysisPanel's
+// dropdown (via its droneChange emit) so the battery-budget preview above
+// it reflects that choice instead of always showing the route's own
+// default drone regardless of what's selected for the next analysis.
+const selectedDroneId = ref<number | null>(null)
+
 const refreshBatteryBudget = async () => {
   if (!route.value) return
   try {
-    batteryBudgets.value = await getBatteryBudget(Number(props.id), route.value.resolved_drone?.id ?? null)
+    batteryBudgets.value = await getBatteryBudget(Number(props.id), selectedDroneId.value)
   } catch {
     batteryBudgets.value = []
   }
+}
+
+const onDroneChange = (droneId: number | null) => {
+  selectedDroneId.value = droneId
+  refreshBatteryBudget()
 }
 
 onMounted(async () => {
@@ -45,7 +56,12 @@ onMounted(async () => {
   profileForm.mcDestination = fetchedRoute.mc_distance_km_destination
   profileForm.fwIsCustom = fetchedRoute.fw_distance_km !== null
   profileForm.fwDistance = fetchedRoute.fw_distance_km ?? fetchedRoute.resolved_fw_distance_km
-  await refreshBatteryBudget()
+  // No explicit initial fetch here: RouteAnalysisPanel's droneId watcher
+  // fires immediately on its own mount (right after this, since it only
+  // renders once drones are loaded — already the case by this point) and
+  // drives the first battery-budget fetch via onDroneChange below. This
+  // also means switching between routes' analysis pages without a full
+  // remount still picks up the right drone.
 })
 
 const saveProfile = async () => {
@@ -149,6 +165,7 @@ const onRun = async (startDate: string, endDate: string, droneId: number | null)
       :drones="dronesStore.drones"
       :default-drone-id="route.resolved_drone?.id ?? null"
       @run="onRun"
+      @drone-change="onDroneChange"
     />
 
     <p v-if="resultsStore.status === 'ERROR'" class="text-danger">{{ resultsStore.errorMessage }}</p>
